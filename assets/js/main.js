@@ -16,7 +16,8 @@ class CompteBancaire {
   }
 }
 /*************************************          Fonctions                 ************************************/
-//Affichage de la fenetre de creation de compte
+
+/***********Fonction Création de compte */
 function displayFormCreation() {
   let displayForm;
   if (document.querySelector(".display-form")) return;
@@ -27,8 +28,8 @@ function displayFormCreation() {
   displayForm.innerHTML = `
             <h2>Créer un compte</h2>
             <form class="create-accompte">
-            <input type="text" class="nom" placeholder="Entrez votre nom" required class="btn-form-create">
-            <input type="text" class="numeroCompte" placeholder="Numéro de compte" required class="btn-form-create" >
+            <input type="text" class="nom" placeholder="Entrez votre nom" required >
+            <input type="text" class="numeroCompte" placeholder="Numéro de compte" required  >
             <button class="btn-submit" id="form-accompte" type="submit" >Créer un compte</button>
             </form>
       `;
@@ -43,11 +44,19 @@ function displayFormCreation() {
     e.preventDefault();
     const nom = inputNom.value;
     const numeroCompte = inputNumeroCompte.value;
+    //Gére l'entrée de l'input du numéro de compte
+    if (isNaN(numeroCompte)) {
+      displayErreur();
+      erreur.innerHTML =
+        "Veuillez entrer un numéro pour votre numéro de compte";
+      return;
+    }
     let solde = 0;
-    // Vérification si le compte existe dans le tableau
+    // Vérification si le compte existe dans le tableau => je check uniquement si le numero de compte correspond, le noms peut se repeter
     const compte = compteBancaires.find(
-      (user) => user.nom === nom && user.numeroCompte === numeroCompte
+      (user) => user.numeroCompte === numeroCompte
     );
+
     if (compte) {
       displayErreur();
     } else {
@@ -56,8 +65,7 @@ function displayFormCreation() {
     // J'instancie un nouveau compte et je le push dans le tablo
   });
 }
-
-
+/***********Fonction DEPOT */
 // fonction permet de fermer les fenetres
 function displayDepot() {
   let depot;
@@ -79,10 +87,16 @@ function displayDepot() {
   const depotForm = document.querySelector(".create-depot");
   depotForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    console.log(e);
     const nom = document.querySelector(".input-nom-depot").value;
     const numeroCompte = document.querySelector(".input-numero").value;
     const montant = parseFloat(document.querySelector(".input-montant").value);
+
+    if (isNaN(numeroCompte) || isNaN(montant)) {
+      displayErreur();
+      erreur.innerHTML =
+        "Vérifier que la nature de votre numéro de compte et montant soit bien un nombre";
+      return;
+    }
     const compte = compteBancaires.find(
       (user) => user.nom === nom && user.numeroCompte === numeroCompte
     );
@@ -95,7 +109,7 @@ function displayDepot() {
   });
 }
 
-//permet de generer la fenetre succes green pour la section depot
+//Génère la fenetre succes green pour la section depot
 
 function displaySuccessDepot(compte, montant) {
   document.querySelector(".erreur")?.remove();
@@ -104,11 +118,19 @@ function displaySuccessDepot(compte, montant) {
   compte.solde += montant;
   console.log(compte.solde, montant);
   console.log(compteBancaires);
+
+  //vérifie la nature du montant
+  if (montant <= 0 || isNaN(montant)) {
+    displayErreur();
+    erreur.innerHTML = "Le montant doit être superieur à 0";
+    return;
+  }
   //création de la div success verte
   succes = document.createElement("div");
   succes.innerHTML = `
                 <h2>Success</h2>
-                <p>Votre transaction est acceptée pour le compte ${compte.numeroCompte}</p>
+                <p>Votre transaction est acceptée pour le compte ${compte.numeroCompte} <br> 
+                Votre nouveau solde est de ${compte.solde} $ </p>
                 `;
   succes.classList.add("form");
   succes.classList.add("success");
@@ -177,6 +199,8 @@ function removeCreationDisplay() {
 }
 //Nettoyer les fenetre de la section dépot d'argent
 function removeDepotDisplay() {
+  content.querySelector(".erreur")?.remove();
+  content.querySelector(".success")?.remove();
   content.querySelector(".display-depot")?.remove();
 }
 
